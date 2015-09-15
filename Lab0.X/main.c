@@ -10,6 +10,7 @@
  * the LED moves backwards to LED 1 on the RELEASE. At any point after the initial button button press an LED will be lighted. 
  */
 
+/*NO MAGIC NUMBERS*/
 
 #include <xc.h>
 #include <sys/attribs.h>
@@ -26,10 +27,13 @@
 #define CORE_TICK_RATE (SYS_FREQ/2/TOGGLES_PER_SEC)
 //TODO: Define states of the state machine
 typedef enum stateTypeEnum{
-    led1, led2, led3, waitpush, waitrelease, debouncePress, debounceRelease, debounceRelease2
+    led3on, led2on, led1on, waitpush, waitrelease, debouncePress, debounceRelease, debounceRelease2
 } stateType;
 
-//TODO: Use volatile variables that change within interrupts
+volatile state = led1on;
+volatile state = led2on;
+volatile state = led3on;
+volatile state = waitrelease;
 
 int main() {
     
@@ -45,17 +49,19 @@ int main() {
     while(1){
         switch(state) {
             
-            case waitpush:
+            case led3on:
+                if(IFS1bits.CNDIF==1) turnOnLED(3);
+                    break;
+//            case waitrelease: 
+//                if(IFS1bits.CNDIF==1) LATDbits.LATD0 = 0;
+//                    break;     
+            case led2on: 
+                if(IFS1bits.CNDIF==1) turnOnLED(2);
+                    break; 
+                 
+            case led1on:
                 if(IFS1bits.CNDIF==1) turnOnLED(1);
                     break;
-                    
-            case waitrelease: 
-                if(IFS1bits.CNDIF==1) LATDbits.LATD0 = 0;
-                    break; 
-                    
-            case led3: 
-                if(turnOnLED(1)&&)
-                
                 
         }
             
@@ -70,7 +76,7 @@ int main() {
 //}
 void __ISR(_TIMER_1_VECTOR, IPL7SRS) _T1Interrupt() {
     IFS0bits.T1IF = 0; 
-    //If (state == led3) state = led2; 
+    if(state == led3on) state = led2; 
     //else If (state == led2) state = led1;
     //else If (state == led1) state = led3; 
 }

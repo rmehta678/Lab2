@@ -22,19 +22,19 @@ void initLEDs(){
 
 void turnOnLED(int led){
      if(led == 1){
-        LATDbits.LATD0 = 1;
+        LATDbits.LATD0 = 1; //LED 1
         LATDbits.LATD1 = 0;
         LATDbits.LATD2 = 0;
     }
     else if(led == 2){
         LATDbits.LATD0 = 0;
-        LATDbits.LATD1 = 1;
+        LATDbits.LATD1 = 1; //LED 2
         LATDbits.LATD2 = 0;        
     }
     else{
         LATDbits.LATD0 = 0;
         LATDbits.LATD1 = 0;
-        LATDbits.LATD2 = 1;
+        LATDbits.LATD2 = 1; //LED 3
     }
     
     //TODO: You may choose to write this function
