@@ -1,8 +1,13 @@
 /* 
  * File:   main.c
  * Author: rohan_mehta
- *
  * Created on September 13, 2015, 12:21 PM
+ *This program uses 3 LED's. The user pushes a button for any amount of time and the green LED (3) is turned on. 
+ *If the user pushes a button for less than 2 seconds then the LED moves from LED 3 to LED 1. 
+ * After this button press, if the user presses the button for less than 2 seconds the LED moves
+ * from LED 1 to LED 2. If, after the initial button press the user presses the button for more than 2 seconds then
+ * the LED 3 moves backwards to LED 2 on the RELEASE. Likewise, if at LED 2 the button is held for longer than 2 seconds then
+ * the LED moves backwards to LED 1 on the RELEASE. At any point after the initial button button press an LED will be lighted. 
  */
 
 
@@ -70,12 +75,3 @@ void __ISR(_TIMER_1_VECTOR, IPL7SRS) _T1Interrupt() {
     //else If (state == led1) state = led3; 
 }
 
-void DelayMs(unsigned int msec)
-{
-	unsigned int tWait, tStart;
-		
-    tWait=(SYS_FREQ/2000)*msec;
-//    tStart=ReadCoreTimer(); //Find what this is
-//    while((ReadCoreTimer()-tStart)<tWait);		// wait for the time to pass
-
-}
