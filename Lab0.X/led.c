@@ -7,6 +7,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "led.h"
+#include <xc.h>
+#include <sys/attribs.h>
 
 #define OUTPUT 0
 #define INPUT 1

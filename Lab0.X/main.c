@@ -30,10 +30,7 @@ typedef enum stateTypeEnum{
     led3on, led2on, led1on, waitpush, waitrelease, debouncePress, debounceRelease, debounceRelease2
 } stateType;
 
-volatile state = led1on;
-volatile state = led2on;
-volatile state = led3on;
-volatile state = waitrelease;
+volatile stateType state1 = led3on;
 
 int main() {
     
@@ -47,18 +44,17 @@ int main() {
     initTimer1();
     
     while(1){
-        switch(state) {
+        switch(state1) {
             
             case led3on:
                 if(IFS1bits.CNDIF==1) turnOnLED(3);
+                    break;  
+            case waitrelease: 
+                if(IFS0bits.T1IF==1);
                     break;
-//            case waitrelease: 
-//                if(IFS1bits.CNDIF==1) LATDbits.LATD0 = 0;
-//                    break;     
             case led2on: 
                 if(IFS1bits.CNDIF==1) turnOnLED(2);
-                    break; 
-                 
+                    break;     
             case led1on:
                 if(IFS1bits.CNDIF==1) turnOnLED(1);
                     break;
@@ -76,8 +72,14 @@ int main() {
 //}
 void __ISR(_TIMER_1_VECTOR, IPL7SRS) _T1Interrupt() {
     IFS0bits.T1IF = 0; 
-    if(state == led3on) state = led2; 
-    //else If (state == led2) state = led1;
-    //else If (state == led1) state = led3; 
+    if(state1 == led3on) state1 = led2on; 
+    else if (state1 == led2on) state1 = led1on;
+    else if (state1 == led1on) state1 = led3on; 
 }
 
+void __ISR(_TIMER_2_VECTOR, IPL7SRS) _T2Interrupt() {
+    IFS0bits.T2IF = 0; 
+    if(state1 == led3on) state1 = led2on; 
+    else if (state1 == led2on) state1 = led1on;
+    else if (state1 == led1on) state1 = led3on; 
+}
