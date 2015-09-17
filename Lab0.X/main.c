@@ -30,11 +30,12 @@
 
 //TODO: Define states of the state machine
 typedef enum stateTypeEnum{
-    led3, led2, led1, waitpush, waitrelease, debouncePress, debounceRelease, waitrelease2, nextstate, prevstate
+    led3, led2, led1, waitpush, waitrelease, debouncePress, debounceRelease, waitrelease2, next
 } stateType;
 
-volatile stateType state1 = prevstate;
-
+volatile stateType currentstate = waitpush;
+volatile stateType nextstate = led2;
+volatile stateType prevstate = led3;
 
 
 int main() {
@@ -48,61 +49,59 @@ int main() {
     initTimer2();
     initTimer1();
     
-//    nextstate = led2;
-//    prevstate = led1;
-    
+
     
     while(1){
-        switch(state1) {
+        switch(currentstate) {
             case waitpush:
                 if (PORTDbits.RD6 == PRESSED) { 
-                    state1 = debouncePress;
+                    currentstate = debouncePress;
                 }
                 break;   
 
             case debouncePress:
-                delayMs(2);
+                delayMs(200);
                 T1CONbits.TON = ON;
-                state1 = waitrelease;
+                currentstate = waitrelease;
                 break;
                 
             case waitrelease:
                 if(IFS0bits.T1IF = OFF) {
-                    state1 = debounceRelease;
+                    currentstate = debounceRelease;
                 }
                 break;
                 
             case waitrelease2:
                 if(IFS0bits.T1IF = ON) {
-                    state1 = debounceRelease;
+                    nextstate = prevstate;
                 }
                 break;  
             case debounceRelease:
-                delayMs(2);
-                state1 = nextstate;
+                delayMs(200);
+                currentstate = nextstate;
                 break;
-            case nextstate:
-                if(nextstate == led1) {
-                    state1 = led2;
+            case next:
+                if(currentstate == led1) {
+                    nextstate = led2;
                 }
-                else if(nextstate == led2) {
-                    state1 = led3;
+                else if(currentstate == led2) {
+                    nextstate = led3;
                 }
-                else if(nextstate == led3) {
-                    state1 = led1;
+                else if(currentstate == led3) {
+                    nextstate = led1;
                 }
                 break;
             case led1:
                 turnOnLED(1);
-                state1 = waitpush;
+                currentstate = waitpush;
                 break;
             case led2:
                 turnOnLED(2);
-                state1 = waitpush;
+                currentstate = waitpush;
                 break;
             case led3:
                 turnOnLED(3);
-                state1 = waitpush;
+                currentstate = waitpush;
                 break;
         }
     }
@@ -115,7 +114,7 @@ int main() {
 
 void __ISR(_TIMER_1_VECTOR, IPL7SRS) _T1Interrupt() {
     IFS0bits.T1IF = OFF;   
-    if(state1 == led1) prevstate = led3;
-    if(state1 == led2) prevstate = led1;
-    if(state1 == led3) prevstate = led2;
+    if(currentstate == led1) prevstate = led3;
+    if(currentstate == led2) prevstate = led1;
+    if(currentstate == led3) prevstate = led2;
 }
