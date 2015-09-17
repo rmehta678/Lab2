@@ -22,15 +22,20 @@
 
 #define OUTPUT 0
 #define INPUT 1
-#define SYS_FREQ (8000000000L)
-#define TOGGLES_PER_SEC 2
-#define CORE_TICK_RATE (SYS_FREQ/2/TOGGLES_PER_SEC)
+#define PRESS 0
+#define RELEASE 1
+#define PRESSED 0
+#define ON 1
+#define OFF 0
+
 //TODO: Define states of the state machine
 typedef enum stateTypeEnum{
-    led3on, led2on, led1on, waitpush, waitrelease, debouncePress, debounceRelease, debounceRelease2
+    led3, led2, led1, waitpush, waitrelease, debouncePress, debounceRelease, waitrelease2, nextstate, prevstate
 } stateType;
 
-volatile stateType state1 = led3on;
+volatile stateType state1 = prevstate;
+
+
 
 int main() {
     
@@ -43,43 +48,74 @@ int main() {
     initTimer2();
     initTimer1();
     
+//    nextstate = led2;
+//    prevstate = led1;
+    
+    
     while(1){
         switch(state1) {
-            
-            case led3on:
-                if(IFS1bits.CNDIF==1) turnOnLED(3);
-                    break;  
-            case waitrelease: 
-                if(IFS0bits.T1IF==1);
-                    break;
-            case led2on: 
-                if(IFS1bits.CNDIF==1) turnOnLED(2);
-                    break;     
-            case led1on:
-                if(IFS1bits.CNDIF==1) turnOnLED(1);
-                    break;
+            case waitpush:
+                if (PORTDbits.RD6 == PRESSED) { 
+                    state1 = debouncePress;
+                }
+                break;   
+
+            case debouncePress:
+                delayMs(2);
+                T1CONbits.TON = ON;
+                state1 = waitrelease;
+                break;
                 
+            case waitrelease:
+                if(IFS0bits.T1IF = OFF) {
+                    state1 = debounceRelease;
+                }
+                break;
+                
+            case waitrelease2:
+                if(IFS0bits.T1IF = ON) {
+                    state1 = debounceRelease;
+                }
+                break;  
+            case debounceRelease:
+                delayMs(2);
+                state1 = nextstate;
+                break;
+            case nextstate:
+                if(nextstate == led1) {
+                    state1 = led2;
+                }
+                else if(nextstate == led2) {
+                    state1 = led3;
+                }
+                else if(nextstate == led3) {
+                    state1 = led1;
+                }
+                break;
+            case led1:
+                turnOnLED(1);
+                state1 = waitpush;
+                break;
+            case led2:
+                turnOnLED(2);
+                state1 = waitpush;
+                break;
+            case led3:
+                turnOnLED(3);
+                state1 = waitpush;
+                break;
         }
-            
-        }
+    }
+   
         //TODO: Implement a state machine to create the desired functionality
         
     return 0;
 }
 
-//void __ISR(_CHANGE_NOTICE_VECTOR, IPL7SRS) _CNInterrupt() {
-//    IFS1bits.CNDIF = 0;
-//}
-void __ISR(_TIMER_1_VECTOR, IPL7SRS) _T1Interrupt() {
-    IFS0bits.T1IF = 0; 
-    if(state1 == led3on) state1 = led2on; 
-    else if (state1 == led2on) state1 = led1on;
-    else if (state1 == led1on) state1 = led3on; 
-}
 
-void __ISR(_TIMER_2_VECTOR, IPL7SRS) _T2Interrupt() {
-    IFS0bits.T2IF = 0; 
-    if(state1 == led3on) state1 = led2on; 
-    else if (state1 == led2on) state1 = led1on;
-    else if (state1 == led1on) state1 = led3on; 
+void __ISR(_TIMER_1_VECTOR, IPL7SRS) _T1Interrupt() {
+    IFS0bits.T1IF = OFF;   
+    if(state1 == led1) prevstate = led3;
+    if(state1 == led2) prevstate = led1;
+    if(state1 == led3) prevstate = led2;
 }
