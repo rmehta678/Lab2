@@ -30,13 +30,14 @@
 
 //TODO: Define states of the state machine
 typedef enum stateTypeEnum{
-    led3, led2, led1, waitpush, waitrelease, debouncePress, debounceRelease, waitrelease2, next
+    led3, led2, led1, waitpush, waitrelease, debouncePress, debounceRelease, debounceRelease2, waitrelease2, next, prev
 } stateType;
 
+//Initializes three states to initial states
 volatile stateType currentstate = waitpush;
-volatile stateType nextstate = led2;
+volatile stateType nextstate = led1;
 volatile stateType prevstate = led3;
-
+volatile int count = 0;
 
 int main() {
     
@@ -60,35 +61,76 @@ int main() {
                 break;   
 
             case debouncePress:
-                delayMs(200);
+                delayMs(5);
                 T1CONbits.TON = ON;
+                TMR1 = OFF;
+                count = 0;
                 currentstate = waitrelease;
                 break;
                 
             case waitrelease:
-                if(IFS0bits.T1IF = OFF) {
+                if(PORTDbits.RD6 == RELEASE && count<2) {
                     currentstate = debounceRelease;
+                    T1CONbits.TON = OFF;
                 }
+                
+                else if (PORTDbits.RD6 == RELEASE && count>=2) {
+                    currentstate = debounceRelease2;
+                    T1CONbits.TON = OFF;
+                }
+                break;
+//            case waitrelease2:
+//                if(PORTDbits.RD6 == RELEASE && count>=2) {
+//                    currentstate = debounceRelease2;
+//                }
+//                break;
+                
+            case debounceRelease:
+                delayMs(5);
+                count = 0;
+                currentstate = next;              
                 break;
                 
-            case waitrelease2:
-                if(IFS0bits.T1IF = ON) {
-                    nextstate = prevstate;
-                }
-                break;  
-            case debounceRelease:
-                delayMs(200);
-                currentstate = nextstate;
+            case debounceRelease2:
+                delayMs(5);
+                currentstate = prev;
                 break;
+                
             case next:
-                if(currentstate == led1) {
+                if(nextstate == led1) {
+                    currentstate = nextstate;
+                    prevstate = led3;
                     nextstate = led2;
+                    
                 }
-                else if(currentstate == led2) {
+                else if(nextstate == led2) {
+                    currentstate = nextstate;
+                    prevstate = led1;
                     nextstate = led3;
                 }
-                else if(currentstate == led3) {
+                else if(nextstate == led3) {  
+                    currentstate = nextstate;
+                    prevstate = led2;
+                    nextstate = led1;   
+                }
+                break;
+            case prev: 
+                if(prevstate == led1) {
+                    currentstate = prevstate;
+                    nextstate = led2;
+                    prevstate = led3;
+                    
+                }
+                else if(prevstate == led2) {
+                    currentstate = prevstate;
+                    nextstate = led3;
+                    prevstate = led1;
+                    
+                }
+                else if(prevstate == led3) {
+                    currentstate = prevstate;
                     nextstate = led1;
+                    prevstate = led2;     
                 }
                 break;
             case led1:
@@ -104,6 +146,8 @@ int main() {
                 currentstate = waitpush;
                 break;
         }
+        
+        
     }
    
         //TODO: Implement a state machine to create the desired functionality
@@ -111,10 +155,17 @@ int main() {
     return 0;
 }
 
+/*Interrupt service routine function utilizing timer 1. This function is entered as 
+ * the flag goes up for timer 1 reaching the PR value. In other words, the user has held
+ * the button down for more than 2 seconds. In this function the previous state is updated 
+ * to be that which is previous to currentstate */
 
-void __ISR(_TIMER_1_VECTOR, IPL7SRS) _T1Interrupt() {
-    IFS0bits.T1IF = OFF;   
-    if(currentstate == led1) prevstate = led3;
-    if(currentstate == led2) prevstate = led1;
-    if(currentstate == led3) prevstate = led2;
+void __ISR(_TIMER_1_VECTOR, IPL3SRS) _T1Interrupt() {
+    IFS0bits.T1IF = OFF;
+//    if(currentstate == waitrelease) {
+//        currentstate = waitrelease2;
+//    }
+        count++;
+    
+
 }
