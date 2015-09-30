@@ -92,25 +92,36 @@ void initLCD(void) {
     TRIS_D4 = OUTPUT;
     TRIS_RS = OUTPUT;
     TRIS_E  = OUTPUT;
-
+    
     // Initilization sequence utilizes specific LCD commands before the general configuration
     // commands can be utilized. The first few initilition commands cannot be done using the
     // WriteLCD function. Additionally, the specific sequence and timing is very important.
-
+    delayUs(16000);
     // Enable 4-bit interface
-
+    writeFourBits(0x30, OFF, 4100, 0);
+    writeFourBits(0x30, OFF, 101, 0);
     // Function Set (specifies data width, lines, and font.
+  
 
     // 4-bit mode initialization is complete. We can now configure the various LCD
     // options to control how the LCD will function.
+    writeLCD(0x32,OFF,0);
+    
+    
+   
+  
 
     // TODO: Display On/Off Control
         // Turn Display (D) Off
+    writeLCD(0x28,OFF,0);
     // TODO: Clear Display (The delay is not specified in the data sheet at this point. You really need to have the clear display delay here.
+    writeLCD(0x08,OFF,0);
     // TODO: Entry Mode Set
         // Set Increment Display, No Shift (i.e. cursor move)
+    writeLCD(0x01,OFF,0);
     // TODO: Display On/Off Control
         // Turn Display (D) On, Cursor (C) Off, and Blink(B) Off
+    writeLCD(0x07,OFF,0);
 }
 
 /*
