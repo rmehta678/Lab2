@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project-private xmlns="http://www.netbeans.org/ns/project-private/1">
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/1"/>
+    <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/Users/rohan_mehta/Downloads/lab1p1-student/main.c</file>
+            <file>file:/Users/rohan_mehta/MPLABXProjects/Lab1Team204.X/main.c</file>
+            <file>file:/Users/rohan_mehta/MPLABXProjects/Lab1Team204.X/switch.h</file>
+            <file>file:/Users/rohan_mehta/MPLABXProjects/Lab1Team204.X/timer.c</file>
+            <file>file:/Users/rohan_mehta/MPLABXProjects/Lab1Team204.X/leds.c</file>
+            <file>file:/Users/rohan_mehta/MPLABXProjects/Lab1Team204.X/lcd.c</file>
+            <file>file:/Users/rohan_mehta/MPLABXProjects/Lab1Team204.X/timer.h</file>
         </group>
     </open-files>
 </project-private>

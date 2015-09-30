@@ -16,14 +16,13 @@
 /*
  * 
  */
-void initLEDs(){
+void initLEDs(){ //Initializes the LED's as outputs
     TRISDbits.TRISD0 = OUTPUT;
     TRISDbits.TRISD1 = OUTPUT;
     TRISDbits.TRISD2 = OUTPUT;
-    //TODO: Initialize LEDs
 }
 
-void turnOnLED(int led){
+void turnOnLED(int led){ //Code from class
      if(led == 1){
         LATDbits.LATD0 = 1; //LED 1
         LATDbits.LATD1 = 0;
@@ -40,7 +39,5 @@ void turnOnLED(int led){
         LATDbits.LATD2 = 1; //LED 3
     }
     
-    //TODO: You may choose to write this function
-    // as a matter of convenience
     
 }

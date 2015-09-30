@@ -35,16 +35,16 @@ typedef enum stateTypeEnum{
 
 //Initializes three states to initial states
 volatile stateType currentstate = waitpush;
-volatile stateType nextstate = led1;
-volatile stateType prevstate = led3;
-volatile int count = 0;
+volatile stateType nextstate = led1; //points to the first state in the state machine which is when LED1 is on
+volatile stateType prevstate = led3; //points to the state previous to the first state which is LED3 
+volatile int count = 0; //an integer to keep track of the number of times the ISR flag was raised
 
 int main() {
     
     //This function is necessary to use interrupts. 
     enableInterrupts();
     
-    //TODO: Write each initialization function
+    //Initializes each function
     initSwitch1();
     initLEDs();
     initTimer2();
@@ -53,25 +53,25 @@ int main() {
 
     
     while(1){
-        switch(currentstate) {
+        switch(currentstate) { //switching the state in the parenthesis 
             case waitpush:
-                if (PORTDbits.RD6 == PRESSED) { 
-                    currentstate = debouncePress;
+                if (PORTDbits.RD6 == PRESSED) { //if write port is triggered with value 0 
+                    currentstate = debouncePress; //transition to debounce state
                 }
                 break;   
 
-            case debouncePress:
-                delayMs(5);
-                T1CONbits.TON = ON;
-                TMR1 = OFF;
-                count = 0;
-                currentstate = waitrelease;
+            case debouncePress: 
+                delayMs(5); //delaying for 5 milliseconds
+                T1CONbits.TON = ON; //turn on timer because button is now pressed and being held
+                TMR1 = OFF; //turn timer 1 off 
+                count = 0; //count initialized to 0
+                currentstate = waitrelease; //transition to wait release
                 break;
                 
             case waitrelease:
-                if(PORTDbits.RD6 == RELEASE && count<2) {
+                if(PORTDbits.RD6 == RELEASE && count<2) { //if the button is released and the count is less than 2 enter debounceRelease
                     currentstate = debounceRelease;
-                    T1CONbits.TON = OFF;
+                    T1CONbits.TON = OFF; //turn timer off because button has been released
                 }
                 
                 else if (PORTDbits.RD6 == RELEASE && count>=2) {
@@ -79,16 +79,11 @@ int main() {
                     T1CONbits.TON = OFF;
                 }
                 break;
-//            case waitrelease2:
-//                if(PORTDbits.RD6 == RELEASE && count>=2) {
-//                    currentstate = debounceRelease2;
-//                }
-//                break;
                 
             case debounceRelease:
-                delayMs(5);
-                count = 0;
-                currentstate = next;              
+                delayMs(5); //delay 5ms
+                count = 0; //count is 0 because there is no need to time if the button is not being pressed
+                currentstate = next; //move on to next             
                 break;
                 
             case debounceRelease2:
@@ -97,7 +92,7 @@ int main() {
                 break;
                 
             case next:
-                if(nextstate == led1) {
+                if(nextstate == led1) { //This state contains the LED logic for moving forward
                     currentstate = nextstate;
                     prevstate = led3;
                     nextstate = led2;
@@ -115,7 +110,7 @@ int main() {
                 }
                 break;
             case prev: 
-                if(prevstate == led1) {
+                if(prevstate == led1) { //contains LED logic for moving backward
                     currentstate = prevstate;
                     nextstate = led2;
                     prevstate = led3;
@@ -133,16 +128,16 @@ int main() {
                     prevstate = led2;     
                 }
                 break;
-            case led1:
+            case led1: //turns on LED one and moves back to wait for next push
                 turnOnLED(1);
                 currentstate = waitpush;
                 break;
-            case led2:
+            case led2: //turns on LED two and moves back to wait for next push
                 turnOnLED(2);
                 currentstate = waitpush;
                 break;
             case led3:
-                turnOnLED(3);
+                turnOnLED(3); //turns on LED three and moves back to wait for next push
                 currentstate = waitpush;
                 break;
         }
@@ -157,15 +152,12 @@ int main() {
 
 /*Interrupt service routine function utilizing timer 1. This function is entered as 
  * the flag goes up for timer 1 reaching the PR value. In other words, the user has held
- * the button down for more than 2 seconds. In this function the previous state is updated 
- * to be that which is previous to currentstate */
+ * the button down for more than 2 seconds. The count is updated everytime the timer1 reaches
+ * the PR value of 1221*2 which is equivalent to 1 second. Up above as soon as the count reaches 
+ * 2, the LED moves backwards */
 
 void __ISR(_TIMER_1_VECTOR, IPL3SRS) _T1Interrupt() {
-    IFS0bits.T1IF = OFF;
-//    if(currentstate == waitrelease) {
-//        currentstate = waitrelease2;
-//    }
-        count++;
+    IFS0bits.T1IF = OFF;//turn down flag 
     
-
+        count++; //increment count because we have entered the interrupt function
 }
