@@ -12,7 +12,6 @@
 #include "lcd.h"
 #include "timer.h"
 
-#define LCD_DATA  
 #define LCD_RS LATCbits.LATC2 
 #define LCD_E LATCbits.LATC4 
 
@@ -43,16 +42,16 @@
 void writeFourBits(unsigned char word, unsigned int commandType, unsigned int delayAfter, unsigned int lower){
     //TODO:
     if(lower == 0) {
-        D7 = (word&(0b10000000)>>7);
-        D6 = (word&(0b01000000)>>6);
-        D5 = (word&(0b00100000)>>5);
-        D4 = (word&(0b00010000)>>4);
+        D7 = (word&0x80)>>7;
+        D6 = (word&0x40)>>6;
+        D5 = (word&0x20)>>5;
+        D4 = (word&0x10)>>4;
     }
     if(lower == 1) {
-        D4 = (word&(0b00000001));
-        D5 = (word&(0b00000010)>>1);
-        D6 = (word&(0b00000100)>>2);
-        D7 = (word&(0b00001000)>>3);
+        D4 = word&0x01;
+        D5 = (word&0x02)>>1;
+        D6 = (word&0x04)>>2;
+        D7 = (word&0x08)>>3;
     }
     delayUs(1);
     LCD_RS = commandType; 
@@ -93,7 +92,6 @@ void initLCD(void) {
     TRIS_D4 = OUTPUT;
     TRIS_RS = OUTPUT;
     TRIS_E  = OUTPUT;
-    LCD_RS = 0;
     
     // Initilization sequence utilizes specific LCD commands before the general configuration
     // commands can be utilized. The first few initilition commands cannot be done using the
@@ -132,7 +130,7 @@ void initLCD(void) {
 void printStringLCD(const char* s) {
     //TODO:
     int i = 7;
-    for (i = 7; i=0; i--) {
+    for (i = 0; i < strlen(s); i++) {
         printCharLCD(s[i]);
     } 
 }
@@ -141,7 +139,7 @@ void printStringLCD(const char* s) {
  * Clear the display.
  */
 void clearLCD(){
-    writeLCD(0x01,1,1650); 
+    writeLCD(0x01, 0, 1650); 
 }
 
 /*
@@ -149,11 +147,11 @@ void clearLCD(){
  */
 void moveCursorLCD(unsigned char x, unsigned char y){
     
-    if(y == 1) {
-        writeLCD(0x80 + (x-1), 0, 40);
+    if(x == 0) {
+        writeLCD(0x80 + y, 0, 40);
         }
-    if(y == 2) {
-        writeLCD(0x80 + 0x40 + (x-1), 0, 40);
+    if(x == 1) {
+        writeLCD(0x80 + 0x40 + y, 0, 40);
     }
 }
 
@@ -167,9 +165,13 @@ void testLCD(){
     printCharLCD('c');
     for(i = 0; i < 1000; i++) delayUs(1000);
     clearLCD();
+    for(i = 0; i < 1000; i++) delayUs(1000);
     printStringLCD("Hello!");
     moveCursorLCD(1, 2);
     for(i = 0; i < 1000; i++) delayUs(1000);
     printStringLCD("Hello!");
     for(i = 0; i < 1000; i++) delayUs(1000);
+    clearLCD();
+    for(i = 0; i < 1000; i++) delayUs(1000);
+
 }
