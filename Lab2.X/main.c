@@ -13,20 +13,31 @@
 #include "keypad.h"
 #include "config.h"
 #include "interrupt.h"
+
 typedef enum stateTypeEnum{
-    waitpush, debouncePress, scanKeyPad, waitrelease, debounceRelease
+    waitpush, debouncePress, waitrelease, debounceRelease
 } stateType;
 
 volatile stateType currentstate = waitpush;
 volatile int dummyVariable = 0;
+volatile int dummyVariable2 = 0;
 volatile char c;
+
 int main(void)
 {
-    SYSTEMConfigPerformance(80000000);
+    SYSTEMConfigPerformance(40000000);
     enableInterrupts();
     initKeypad();
     initLCD();
-    while (1) {
+//    
+    moveCursorLCD(0,0);
+    
+//    while (1) {
+//       
+//
+//    }
+//}
+    while(1) {
         switch(currentstate) {
         case waitpush:
            break; 
@@ -45,6 +56,7 @@ int main(void)
         case debounceRelease:
             delayUs(50);
             printCharLCD(c);
+            currentstate = waitpush;
             break;           
         }
     }
@@ -57,16 +69,15 @@ int main(void)
 //    }
    /*TESTING KEYPAD*/
  
- 
+}
 // while(1)
 //    {
 //       ODCBbits.ODCB11 = 0;
 //       LATBbits.LATB11 = 0; 
 //       
 //    }
-}
     
- void __ISR(_CHANGE_NOTICE_VECTOR, IPL7SRS) _CNInterrupt( void ){
+ void __ISR(_CHANGE_NOTICE_VECTOR, IPL7AUTO) _CNInterrupt( void ){
     dummyVariable = PORTB;
     IFS1bits.CNBIF = 0;
     if(currentstate==waitpush) {

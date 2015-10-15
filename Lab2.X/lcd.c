@@ -32,6 +32,8 @@
 
 #define OUTPUT 0
 #define INPUT 1
+
+volatile int count = 0;
 /* This function should take in a one-byte word and writes either the lower or upper
  * byte to the last four bits of LATB. Additionally, according to the LCD data sheet
  * It should set LCD_RS and LCD_E with the appropriate values and delays.
@@ -76,10 +78,15 @@ void writeLCD(unsigned char word, unsigned int commandType, unsigned int delayAf
 /* Given a character, write it to the LCD. RS should be set to the appropriate value.
  */
 void printCharLCD(char c) {
-    unsigned char y;
     writeLCD(c, 1, 50);
+    count = count+1;
+    if(count==8) {
+        moveCursorLCD(1,0);
+    }
+    if(count==16) {
     writeLCD(0x02,0,1640); 
-    //TODO
+    count = 0;
+    }   //TODO
 }
 /*Initialize the LCD
  */
