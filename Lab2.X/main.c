@@ -20,7 +20,6 @@ typedef enum stateTypeEnum{
 
 volatile stateType currentstate = waitpush;
 volatile int dummyVariable = 0;
-volatile int dummyVariable2 = 0;
 volatile char c;
 
 int main(void)

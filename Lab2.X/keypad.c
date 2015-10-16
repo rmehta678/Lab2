@@ -49,6 +49,8 @@
 
 #define HIGH 0
 #define LOW 1
+
+volatile int counter = 0;
   
 /* Initialize the rows as ODC outputs and the columns as inputs with pull-up
  * resistors. Don't forget about other considerations...
@@ -82,24 +84,16 @@ void initKeypad(void){
     WRITEROW3 = HIGH;
     WRITEROW4 = HIGH;
     
-    CNCONBbits.ON = 1;                  // Enable overall interrupt
-    CNENBbits.CNIEB4 = ENABLED;         // Enable pin CN
-    CNENBbits.CNIEB2 = ENABLED;
-    CNENBbits.CNIEB0 = ENABLED;
-    IPC8bits.CNIP = 7;                  // Configure interrupt priority
-    IPC8bits.CNIS = 7;                  // Configure the interrupt sub-priority
-    IEC1bits.CNBIE = ENABLED;           // Enable interrupt for B pins
-    IFS1bits.CNBIF = 0;                 // Put down the flag
+    OVERALLINTERRUPT = ENABLED;                  // Enable overall interrupt
+    REGISTERINTERRUPTB4 = ENABLED;         // Enable pin CN
+    REGISTERINTERRUPTB2 = ENABLED;
+    REGISTERINTERRUPTB0 = ENABLED;
+    INTERRUPTPRIORITY = 7;                  // Configure interrupt priority
+    INTERRUPTSUBPRIORITY = 7;                  // Configure the interrupt sub-priority
+    INTERRUPTB = ENABLED;           // Enable interrupt for B pins
+    FLAG = DISABLED;                 // Put down the flag
     
-//    OVERALLINTERRUPT = 1;                  // Enable overall interrupt
-//    REGISTERINTERRUPTB4 =  1;        // Enable pin B4
-//    REGISTERINTERRUPTB2 =  1;        // Enable pin B2
-//    REGISTERINTERRUPTB0 =  1;        // Enable pin B0
-//   
-//    FLAG = 0;                              // Put down the flag
-//    INTERRUPTPRIORITY = 7;                 // Configure interrupt priority
-//    INTERRUPTSUBPRIORITY = 7;              // Configure the interrupt sub-priority
-//    INTERRUPTB = 1;                  // Enable interrupt for B pins
+
 }
 
 /* This function will be called AFTER you have determined that someone pressed
@@ -110,7 +104,8 @@ void initKeypad(void){
  */
 char scanKeypad(void){
     //if row ODC is enabled
-    char key = -1;
+    char key = -1;  
+    counter = 0;
     //consider a different interrupt bit because how is the keypad supposed to recognize presses if the CN is disabled
     INTERRUPTB = DISABLED;
     
@@ -118,67 +113,80 @@ char scanKeypad(void){
     WRITEROW2 = LOW;
     WRITEROW3 = LOW;
     WRITEROW4 = LOW;
-    delayUs(5);
+    delayUs(10);
     if((READCOL1==PRESSED)&&(READCOL2==RELEASED)&&(READCOL3==RELEASED)) {
         key= '1';
+        counter = counter+1;
     }
     else if((READCOL1==RELEASED)&&(READCOL2==PRESSED)&&(READCOL3==RELEASED)) {
         key= '2';
+        counter = counter+1;
     } 
     else if((READCOL1==RELEASED)&&(READCOL2==RELEASED)&&(READCOL3==PRESSED)){
         key= '3';
+        counter = counter+1;
     }
     WRITEROW1 = LOW;
     WRITEROW2 = HIGH;
     WRITEROW3 = LOW;
     WRITEROW4 = LOW;
-    delayUs(5);
-    if((READCOL1==PRESSED)&&(READCOL2==RELEASED)&&(READCOL3==RELEASED)) {
-       
-        key= '4';
-        
+    delayUs(10);
+    if((READCOL1==PRESSED)&&(READCOL2==RELEASED)&&(READCOL3==RELEASED)) {    
+        key= '4'; 
+        counter = counter+1;
     }
     else if((READCOL1==RELEASED)&&(READCOL2==PRESSED)&&(READCOL3==RELEASED)) {
         key= '5';
+        counter = counter+1;
     }
     else if((READCOL1==RELEASED)&&(READCOL2==RELEASED)&&(READCOL3==PRESSED)){
         key= '6';
+        counter = counter+1;
     }
     WRITEROW1 = LOW;
     WRITEROW2 = LOW;
     WRITEROW3 = HIGH;
     WRITEROW4 = LOW;
-    delayUs(5);
+    delayUs(10);
     if((READCOL1==PRESSED)&&(READCOL2==RELEASED)&&(READCOL3==RELEASED)) {
-        key= '7';
-        
+        key= '7'; 
+        counter = counter+1;
     }
     else if((READCOL1==RELEASED)&&(READCOL2==PRESSED)&&(READCOL3==RELEASED)) {
         key= '8';
+        counter = counter+1;
     }
     else if((READCOL1==RELEASED)&&(READCOL2==RELEASED)&&(READCOL3==PRESSED)){
         key= '9';
+        counter = counter+1;
     }
     WRITEROW1 = LOW;
     WRITEROW2 = LOW;
     WRITEROW3 = LOW;
     WRITEROW4 = HIGH;
-    delayUs(5);
+    delayUs(10);
     if((READCOL1==PRESSED)&&(READCOL2==RELEASED)&&(READCOL3==RELEASED)) {
         key = '*';
+        counter = counter+1;
     }
     else if((READCOL1==RELEASED)&&(READCOL2==PRESSED)&&(READCOL3==RELEASED)) {
         key ='0';
+        counter = counter+1;
     }
     else if((READCOL1==RELEASED)&&(READCOL2==RELEASED)&&(READCOL3==PRESSED)){
         key ='#';
+        counter = counter+1;
     }
-    INTERRUPTB = ENABLED;
+    delayUs(5);
+    if(counter>1) {
+        key = -1;
+    }
     delayUs(1);
     WRITEROW1 = HIGH;
     WRITEROW2 = HIGH;
     WRITEROW3 = HIGH;
     WRITEROW4 = HIGH;
     delayUs(1);
+    INTERRUPTB = ENABLED;
     return key;
 }
